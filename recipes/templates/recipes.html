@@ -1,0 +1,44 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Recipe Suggestor</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="{% static 'js/script.js' %}"></script>
+</head>
+<body>
+    <header>
+        <div class="header-icon"></div>
+        <h1>Recipe Suggestor</h1>
+    </header>
+
+    <div class="container">
+        {% if recipes %}
+            <ul>
+                {% for recipe in recipes %}
+                    <li class="recipe clearfix" onclick="getRecipeDetails({{ recipe.id }})">
+                        <img src="{{ recipe.image }}" alt="{{ recipe.title }}">
+                        <h2>{{ recipe.title }}</h2>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No recipes found. Try different ingredients.</p>
+        {% endif %}
+        <a href="/">Back to Search</a>
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="recipeModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modalTitle"></h2>
+            <p id="modalSteps"></p>
+        </div>
+    </div>
+    
+</body>
+</html>

@@ -1,0 +1,70 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Recipe Suggestor</title>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="{% static 'js/script.js' %}"></script>
+</head>
+<body>
+    <header>
+        <div class="header-icon"></div>
+        <h1>Recipe Suggestor</h1>
+    </header>
+
+    <div class="container">
+        <form method="post" id="recipeForm">
+            {% csrf_token %}
+            <label for="ingredientInput">Enter Ingredients:</label><br>
+            <input type="text" id="ingredientInput" name="ingredientInput" placeholder="Start typing ingredients">
+            <div id="selectedIngredients"></div>
+            <input type="submit" value="Find Recipes">
+        </form>
+    </div>
+
+    <script>
+        $(function() {
+            var selectedIngredients = [];
+
+            $("#ingredientInput").autocomplete({
+                source: function(request, response) {
+                    $.getJSON("/ingredient-suggestions/", {
+                        term: request.term  // send the typed term to the backend
+                    }, function(data) {
+                        response(data);
+                    });
+                },
+                select: function(event, ui) {
+                    var ingredient = ui.item.value;
+
+                    // Check if the ingredient is already selected
+                    if (!selectedIngredients.includes(ingredient)) {
+                        selectedIngredients.push(ingredient);
+                        $('#selectedIngredients').append('<div class="ingredient-tile">' + ingredient + ' <span class="remove-ingredient" data-ingredient="' + ingredient + '">&times;</span></div>');
+                        $('#recipeForm').append('<input type="hidden" name="ingredients" value="' + ingredient + '">');
+                    }
+
+                    this.value = '';
+                    return false;
+                }
+            });
+
+            // Event listener for removing an ingredient
+            $('#selectedIngredients').on('click', '.remove-ingredient', function() {
+                var ingredientToRemove = $(this).data('ingredient');
+                selectedIngredients = selectedIngredients.filter(function(ingredient) {
+                    return ingredient !== ingredientToRemove;
+                });
+
+                // Remove the tile and the corresponding hidden input
+                $(this).parent().remove();
+                $('input[name="ingredients"][value="' + ingredientToRemove + '"]').remove();
+            });
+        });
+    </script>
+</body>
+</html>
